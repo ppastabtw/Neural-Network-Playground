@@ -30,11 +30,11 @@ jobs:
           username: ${{ secrets.PRODUCTION_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
-            git config --global --add safe.directory /var/www/nn-playground
             cd /var/www/nn-playground
-            git fetch origin main
-            git checkout main
-            git pull origin main
+            sudo git config --global --add safe.directory /var/www/nn-playground
+            sudo git fetch origin main
+            sudo git checkout main
+            sudo git pull origin main
             sudo bash deploy/deploy.sh
 
       - name: Health check
