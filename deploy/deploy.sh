@@ -35,7 +35,7 @@ echo "==> Restarting service..."
 systemctl restart nn-playground
 
 echo "==> Waiting for service to start..."
-sleep 3
+sleep 10
 
 echo "==> Health check..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health || true)
