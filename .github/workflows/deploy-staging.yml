@@ -31,6 +31,7 @@ jobs:
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
+            git config --global --add safe.directory /var/www/nn-playground
             cd /var/www/nn-playground
             git fetch origin
             git checkout ${{ github.head_ref }}
