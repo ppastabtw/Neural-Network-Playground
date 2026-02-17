@@ -28,6 +28,9 @@ cd "$APP_DIR"
 echo "==> Running database migrations..."
 PYTHONPATH=src alembic upgrade head
 
+echo "==> Fixing file ownership..."
+chown -R www-data:www-data "$APP_DIR"
+
 echo "==> Restarting service..."
 systemctl restart nn-playground
 
