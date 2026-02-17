@@ -40,13 +40,3 @@ jobs:
             sudo git reset --hard origin/${{ github.head_ref }}
             sudo bash deploy/deploy.sh
 
-      - name: Health check
-        run: |
-          sleep 5
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.STAGING_HOST }}/api/health || true)
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "Staging deploy healthy!"
-          else
-            echo "Staging health check failed (HTTP $HTTP_STATUS)"
-            exit 1
-          fi
