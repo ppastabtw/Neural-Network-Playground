@@ -23,7 +23,7 @@ const CLASS_LABELS = {
   mnist: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
   iris: ['Setosa', 'Versicolor', 'Virginica'],
   synthetic: ['Same Sign (Class 0)', 'Opposite Signs (Class 1)'],
-  wine_quality: ['3', '4', '5', '6', '7', '8', '9'],
+  wine_quality: ['3', '4', '5', '6', '7', '8'],
 };
 
 const TestingPanel = () => {
@@ -151,7 +151,7 @@ const TestingPanel = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 px-3 sm:px-4 py-1.5 border-b border-gray-700 bg-gray-750 flex items-center justify-between">
+      <div className="flex-shrink-0 px-4 py-3 border-b border-gray-700 bg-gradient-to-r from-gray-750 to-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold text-white">Test Your Model</h2>
           <Tooltip text="Feed custom inputs to see predictions in real time. Try varying one feature at a time to build intuition." position="bottom">
@@ -168,7 +168,7 @@ const TestingPanel = () => {
       </div>
 
       {/* Scrollable Input Controls Area */}
-      <div className="flex-1 min-h-0 p-2 sm:p-3 overflow-y-auto">
+      <div className="flex-1 min-h-0 p-3 overflow-y-auto">
         {datasetMismatch && (
           <div className="p-3 mb-2 rounded-lg border border-red-600/50 bg-red-900/20 text-xs text-red-100">
             <p className="font-semibold text-red-100">Train on this dataset before testing</p>

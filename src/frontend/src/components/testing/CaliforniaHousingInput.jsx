@@ -67,13 +67,15 @@ function HouseVisualization({ medInc, houseAge, avgRooms, avgBedrooms, avgOccup,
       <defs>
         {/* Gradients */}
         <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#87CEEB" />
-          <stop offset="60%" stopColor="#B0E0E6" />
-          <stop offset="100%" stopColor="#E0F4FF" />
+          <stop offset="0%" stopColor="#5B9BD5" />
+          <stop offset="40%" stopColor="#87CEEB" />
+          <stop offset="75%" stopColor="#B8DFF0" />
+          <stop offset="100%" stopColor="#F0E6D3" />
         </linearGradient>
         <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#7CBA5F" />
-          <stop offset="100%" stopColor="#5A9A42" />
+          <stop offset="0%" stopColor="#6DB356" />
+          <stop offset="50%" stopColor="#5A9A42" />
+          <stop offset="100%" stopColor="#4A8535" />
         </linearGradient>
         <linearGradient id="pathGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#D4C4A8" />
@@ -97,13 +99,26 @@ function HouseVisualization({ medInc, houseAge, avgRooms, avgBedrooms, avgOccup,
           <stop offset="100%" stopColor={ageDecay > 0.5 ? '#3A2A1A' : (style === 'luxury' ? '#1A202C' : '#654321')} />
         </linearGradient>
         <linearGradient id="bgBuildingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#6B7280" />
-          <stop offset="100%" stopColor="#4B5563" />
+          <stop offset="0%" stopColor="#7B8794" />
+          <stop offset="100%" stopColor="#5A6370" />
         </linearGradient>
-        
+        <linearGradient id="treeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#3D9B40" />
+          <stop offset="100%" stopColor="#2A7A2E" />
+        </linearGradient>
+        <linearGradient id="treeDeadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#6A7A3A" />
+          <stop offset="100%" stopColor="#4A5A2A" />
+        </linearGradient>
+        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FFF7CC" />
+          <stop offset="50%" stopColor="#FFE066" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#FFD700" stopOpacity="0" />
+        </radialGradient>
+
         {/* Filters */}
         <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="2" dy="3" stdDeviation="3" floodOpacity="0.2"/>
+          <feDropShadow dx="1" dy="2" stdDeviation="2.5" floodOpacity="0.18"/>
         </filter>
         <filter id="windowReflect">
           <feGaussianBlur stdDeviation="0.5" result="blur"/>
@@ -116,26 +131,29 @@ function HouseVisualization({ medInc, houseAge, avgRooms, avgBedrooms, avgOccup,
 
       {/* Sky */}
       <rect x="0" y="0" width="200" height="160" fill="url(#skyGrad)" />
-      
-      {/* Sun */}
-      <circle cx="170" cy="25" r="18" fill="#FFE066" opacity="0.9" />
-      <circle cx="170" cy="25" r="14" fill="#FFD700" />
-      
-      {/* Clouds */}
-      <g opacity="0.8">
-        <ellipse cx="40" cy="30" rx="20" ry="10" fill="white" />
-        <ellipse cx="55" cy="28" rx="15" ry="8" fill="white" />
-        <ellipse cx="25" cy="32" rx="12" ry="7" fill="white" />
+
+      {/* Sun with glow */}
+      <circle cx="170" cy="25" r="28" fill="url(#sunGlow)" />
+      <circle cx="170" cy="25" r="14" fill="#FFE066" />
+      <circle cx="170" cy="25" r="10" fill="#FFD700" />
+
+      {/* Clouds - softer, more varied */}
+      <g opacity="0.7">
+        <ellipse cx="38" cy="28" rx="22" ry="9" fill="white" />
+        <ellipse cx="55" cy="25" rx="16" ry="7" fill="white" />
+        <ellipse cx="22" cy="30" rx="14" ry="7" fill="white" />
+        <ellipse cx="120" cy="42" rx="18" ry="7" fill="white" opacity="0.5" />
+        <ellipse cx="135" cy="40" rx="12" ry="5" fill="white" opacity="0.5" />
       </g>
-      
+
       {/* Background hills - fade with more buildings */}
       {numBackgroundBuildings < 4 && (
         <>
-          <ellipse cx="50" cy="158" rx="60" ry="15" fill="#8FBC8F" opacity={0.4 - density * 0.3} />
-          <ellipse cx="160" cy="158" rx="50" ry="12" fill="#90EE90" opacity={0.3 - density * 0.2} />
+          <ellipse cx="45" cy="157" rx="55" ry="14" fill="#78A86A" opacity={0.35 - density * 0.25} />
+          <ellipse cx="165" cy="157" rx="48" ry="11" fill="#8CB87A" opacity={0.3 - density * 0.2} />
         </>
       )}
-      
+
       {/* Background buildings based on population */}
       <g>
         {Array.from({ length: numBackgroundBuildings }).map((_, i) => {
@@ -152,30 +170,38 @@ function HouseVisualization({ medInc, houseAge, avgRooms, avgBedrooms, avgOccup,
           const pos = positions[i];
           const buildingY = 155 - pos.h;
           return (
-            <g key={i} opacity={0.4 + (i < 2 ? 0.2 : 0)}>
-              <rect x={pos.x} y={buildingY} width={pos.w} height={pos.h} fill="url(#bgBuildingGrad)" />
-              {/* Windows on background buildings */}
+            <g key={i} opacity={0.35 + (i < 2 ? 0.15 : 0)}>
+              <rect x={pos.x} y={buildingY} width={pos.w} height={pos.h} fill="url(#bgBuildingGrad)" rx="0.5" />
               {Array.from({ length: Math.floor(pos.h / 12) }).map((_, j) => (
                 <g key={j}>
-                  <rect x={pos.x + 2} y={buildingY + 3 + j * 10} width={4} height={5} fill="#FEF3C7" opacity="0.6" />
-                  <rect x={pos.x + pos.w - 6} y={buildingY + 3 + j * 10} width={4} height={5} fill="#FEF3C7" opacity="0.6" />
+                  <rect x={pos.x + 2} y={buildingY + 3 + j * 10} width={4} height={5} fill="#FEF3C7" opacity="0.5" rx="0.3" />
+                  <rect x={pos.x + pos.w - 6} y={buildingY + 3 + j * 10} width={4} height={5} fill="#FEF3C7" opacity="0.5" rx="0.3" />
                 </g>
               ))}
             </g>
           );
         })}
       </g>
-      
+
       {/* Ground */}
       <rect x="0" y="155" width="200" height="30" fill="url(#grassGrad)" />
+      {/* Subtle ground texture lines */}
+      <line x1="0" y1="162" x2="200" y2="162" stroke="#4A8535" strokeWidth="0.3" opacity="0.3" />
+      <line x1="0" y1="170" x2="200" y2="170" stroke="#4A8535" strokeWidth="0.3" opacity="0.2" />
 
-      {/* Pathway */}
-      <path 
-        d={`M ${cx - 6} 180 Q ${cx - 4} 165 ${cx - 3} ${groundY} L ${cx + 3} ${groundY} Q ${cx + 4} 165 ${cx + 6} 180`}
+      {/* Pathway - slightly curved */}
+      <path
+        d={`M ${cx - 7} 185 Q ${cx - 4} 168 ${cx - 3} ${groundY} L ${cx + 3} ${groundY} Q ${cx + 4} 168 ${cx + 7} 185`}
         fill="url(#pathGrad)"
         stroke="#A0916E"
         strokeWidth="0.5"
       />
+
+      {/* Mailbox */}
+      <g opacity={ageDecay > 0.8 ? 0.5 : 0.85}>
+        <rect x={cx + 12} y={groundY + 2} width="2" height="12" fill="#6B5B4A" rx="0.3" />
+        <rect x={cx + 9} y={groundY} width="8" height="6" rx="1" fill={ageDecay > 0.5 ? '#7A6A5A' : '#4A5568'} />
+      </g>
 
       {/* House Group with shadow */}
       <g filter="url(#softShadow)">
@@ -367,38 +393,60 @@ function HouseVisualization({ medInc, houseAge, avgRooms, avgBedrooms, avgOccup,
         )}
       </g>
 
-      {/* Bushes/Garden - less maintained for old houses */}
-      {ageDecay < 0.7 && (
+      {/* Trees and vegetation */}
+      {ageDecay < 0.7 ? (
         <>
-          <ellipse cx={cx - baseWidth/2 - 8} cy={groundY - 3} rx="8" ry="6" fill="#228B22" opacity="0.8" />
-          <ellipse cx={cx + baseWidth/2 + 8} cy={groundY - 3} rx="7" ry="5" fill="#2E8B57" opacity="0.8" />
+          {/* Nice trees for maintained properties */}
+          <g>
+            {/* Left tree */}
+            <rect x={cx - baseWidth/2 - 10} y={groundY - 18} width="3" height="18" fill="#6B4423" rx="0.5" />
+            <ellipse cx={cx - baseWidth/2 - 9} cy={groundY - 22} rx="10" ry="9" fill="url(#treeGrad)" />
+            <ellipse cx={cx - baseWidth/2 - 12} cy={groundY - 19} rx="7" ry="6" fill="#2D8A32" />
+            <ellipse cx={cx - baseWidth/2 - 5} cy={groundY - 18} rx="6" ry="5" fill="#35A03A" opacity="0.8" />
+            {/* Right bush/shrub */}
+            <ellipse cx={cx + baseWidth/2 + 8} cy={groundY - 3} rx="8" ry="5" fill="#2E8B57" />
+            <ellipse cx={cx + baseWidth/2 + 5} cy={groundY - 4} rx="5" ry="4" fill="#32CD32" opacity="0.6" />
+          </g>
+          {/* Extra landscaping for wealthier homes */}
+          {incomeLevel >= 2 && (
+            <g>
+              <ellipse cx={cx - baseWidth/2 - 2} cy={groundY - 1} rx="4" ry="3" fill="#32CD32" opacity="0.7" />
+              <ellipse cx={cx + baseWidth/2 + 2} cy={groundY - 1} rx="4" ry="3" fill="#32CD32" opacity="0.7" />
+            </g>
+          )}
         </>
-      )}
-      {ageDecay >= 0.7 && (
+      ) : (
         <>
-          <ellipse cx={cx - baseWidth/2 - 8} cy={groundY - 2} rx="10" ry="5" fill="#4A6A3A" opacity="0.6" />
-          <ellipse cx={cx + baseWidth/2 + 8} cy={groundY - 2} rx="9" ry="4" fill="#3A5A2A" opacity="0.6" />
-        </>
-      )}
-      {incomeLevel >= 2 && ageDecay < 0.5 && (
-        <>
-          <ellipse cx={cx - baseWidth/2 - 2} cy={groundY - 2} rx="5" ry="4" fill="#32CD32" opacity="0.7" />
-          <ellipse cx={cx + baseWidth/2 + 2} cy={groundY - 2} rx="5" ry="4" fill="#32CD32" opacity="0.7" />
+          {/* Unkempt vegetation for old houses */}
+          <g>
+            <rect x={cx - baseWidth/2 - 10} y={groundY - 14} width="3" height="14" fill="#5A4A3A" rx="0.5" />
+            <ellipse cx={cx - baseWidth/2 - 9} cy={groundY - 16} rx="9" ry="7" fill="url(#treeDeadGrad)" />
+            <ellipse cx={cx - baseWidth/2 - 12} cy={groundY - 14} rx="6" ry="5" fill="#4A6A3A" opacity="0.7" />
+            <ellipse cx={cx + baseWidth/2 + 8} cy={groundY - 2} rx="10" ry="5" fill="#4A6A3A" opacity="0.6" />
+          </g>
         </>
       )}
 
-      {/* People in yard - supports up to 10, arranged in two rows */}
+      {/* People in yard - stick figure style */}
       <g>
         {Array.from({ length: numPeople }).map((_, i) => {
           const row = Math.floor(i / 5);
           const col = i % 5;
-          const px = 200 - 15 - col * 14; // Start from right side
-          const py = 168 + row * 10; // Second row lower
+          const px = 200 - 15 - col * 14;
+          const py = 166 + row * 11;
           const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'];
+          const c = colors[i % colors.length];
           return (
             <g key={i} transform={`translate(${px}, ${py})`}>
-              <circle cx="0" cy="-4" r="3" fill="#FBBF77" />
-              <ellipse cx="0" cy="3" rx="3" ry="5" fill={colors[i % colors.length]} />
+              {/* Head */}
+              <circle cx="0" cy="-6" r="2.5" fill="#FBBF77" />
+              {/* Body */}
+              <line x1="0" y1="-3.5" x2="0" y2="3" stroke={c} strokeWidth="2" strokeLinecap="round" />
+              {/* Arms */}
+              <line x1="-3" y1="-1" x2="3" y2="-1" stroke={c} strokeWidth="1.2" strokeLinecap="round" />
+              {/* Legs */}
+              <line x1="0" y1="3" x2="-2" y2="7" stroke={c} strokeWidth="1.2" strokeLinecap="round" />
+              <line x1="0" y1="3" x2="2" y2="7" stroke={c} strokeWidth="1.2" strokeLinecap="round" />
             </g>
           );
         })}
@@ -538,51 +586,86 @@ function CaliforniaMap({ latitude, longitude, onSelectLocation }) {
     >
       <defs>
         <linearGradient id="oceanGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1565C0" />
-          <stop offset="100%" stopColor="#0D47A1" />
+          <stop offset="0%" stopColor="#1A6FB5" />
+          <stop offset="50%" stopColor="#145A96" />
+          <stop offset="100%" stopColor="#0D4578" />
         </linearGradient>
         <linearGradient id="caGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#C8A2B0" />
-          <stop offset="100%" stopColor="#B8929F" />
+          <stop offset="0%" stopColor="#D4B896" />
+          <stop offset="40%" stopColor="#C8A878" />
+          <stop offset="100%" stopColor="#B89868" />
         </linearGradient>
+        <linearGradient id="caHighland" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#8B9A6B" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#8B9A6B" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id="markerPulse" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#EF4444" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#EF4444" stopOpacity="0" />
+        </radialGradient>
+        <filter id="mapShadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0.5" dy="0.8" stdDeviation="0.8" floodOpacity="0.3"/>
+        </filter>
+        <filter id="cityGlow">
+          <feGaussianBlur stdDeviation="0.4" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
-      
+
+      {/* Ocean */}
       <rect x="0" y="0" width={width} height={height} fill="url(#oceanGrad2)" rx="5" />
-      
-      <path
-        d={outlinePath}
-        fill="url(#caGrad)"
-        stroke="#8B6B7A"
-        strokeWidth="0.8"
-      />
-      <path d={outlinePath} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.3" />
-      
+      {/* Subtle wave texture */}
+      <path d={`M 0 ${height * 0.3} Q ${width * 0.25} ${height * 0.28} ${width * 0.5} ${height * 0.32} T ${width} ${height * 0.3}`} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" fill="none" />
+      <path d={`M 0 ${height * 0.6} Q ${width * 0.3} ${height * 0.58} ${width * 0.6} ${height * 0.62} T ${width} ${height * 0.6}`} stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" fill="none" />
+
+      {/* State fill + highland overlay for depth */}
+      <path d={outlinePath} fill="url(#caGrad)" filter="url(#mapShadow)" />
+      <path d={outlinePath} fill="url(#caHighland)" />
+      <path d={outlinePath} fill="none" stroke="#8B7A5A" strokeWidth="0.6" />
+      <path d={outlinePath} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.3" strokeDasharray="1 2" />
+
+      {/* Cities */}
       {cities.map((city) => (
-        <g key={city.name}>
+        <g key={city.name} filter="url(#cityGlow)">
           {city.type === 'triangle' ? (
             <polygon
               points={`${city.point.x},${city.point.y - 1.8} ${city.point.x - 1.4},${city.point.y + 1.2} ${city.point.x + 1.4},${city.point.y + 1.2}`}
-              fill="#0f172a"
+              fill="#1E293B"
             />
           ) : (
-            <circle cx={city.point.x} cy={city.point.y} r="1.3" fill="#0f172a" />
+            <circle cx={city.point.x} cy={city.point.y} r="1.2" fill="#1E293B" />
           )}
           <text
             x={city.point.x + 2.2}
             y={city.point.y + 1}
             fontSize="3"
-            fill="#1f2937"
+            fill="#3D2E1E"
+            fontWeight="600"
             style={{ pointerEvents: 'none', userSelect: 'none' }}
           >
             {city.name}
           </text>
         </g>
       ))}
-      
+
+      {/* Location marker with pulse ring */}
       <g>
-        <ellipse cx={markerX} cy={markerY + 2} rx="1.8" ry="0.8" fill="rgba(0,0,0,0.25)" />
-        <circle cx={markerX} cy={markerY} r="2.6" fill="#EF4444" stroke="#991B1B" strokeWidth="0.6" />
-        <circle cx={markerX} cy={markerY} r="1.2" fill="white" />
+        <circle cx={markerX} cy={markerY} r="6" fill="url(#markerPulse)">
+          <animate attributeName="r" values="5;8;5" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite" />
+        </circle>
+        <ellipse cx={markerX} cy={markerY + 2.5} rx="2" ry="0.7" fill="rgba(0,0,0,0.2)" />
+        {/* Pin shape */}
+        <path
+          d={`M ${markerX} ${markerY + 3.5} C ${markerX - 0.5} ${markerY + 1} ${markerX - 3} ${markerY - 1} ${markerX - 3} ${markerY - 2.5} A 3 3 0 1 1 ${markerX + 3} ${markerY - 2.5} C ${markerX + 3} ${markerY - 1} ${markerX + 0.5} ${markerY + 1} ${markerX} ${markerY + 3.5} Z`}
+          fill="#EF4444"
+          stroke="#991B1B"
+          strokeWidth="0.4"
+        />
+        <circle cx={markerX} cy={markerY - 2.5} r="1.2" fill="white" />
       </g>
     </svg>
   );
@@ -593,7 +676,7 @@ const CaliforniaHousingInput = ({ onInputChange }) => {
     HOUSING_FEATURES.reduce((acc, f) => ({ ...acc, [f.name]: f.default }), {})
   );
   const onInputChangeRef = useRef(onInputChange);
-  
+
   // Keep callback ref up to date
   useEffect(() => {
     onInputChangeRef.current = onInputChange;
@@ -635,10 +718,10 @@ const CaliforniaHousingInput = ({ onInputChange }) => {
   return (
     <div className="space-y-2">
       {/* Visual Display */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.75fr_1fr] gap-2 items-stretch">
+      <div className="grid grid-cols-[1.75fr_1fr] gap-2 items-stretch">
         {/* House Visualization */}
-        <div className="relative rounded-xl border border-gray-700/50 bg-gradient-to-b from-gray-800/80 to-gray-900/80 overflow-hidden shadow-lg aspect-[10/9] max-h-[260px] w-full mx-auto">
-          <div className="w-full h-full flex items-center justify-center">
+        <div className="relative rounded-xl border border-gray-700/50 bg-gradient-to-b from-gray-800/80 to-gray-900/80 overflow-hidden shadow-lg max-h-[260px] w-full">
+          <div className="w-full h-full flex items-center justify-center p-1">
             <HouseVisualization
               medInc={values.medInc}
               houseAge={values.houseAge}
@@ -649,10 +732,10 @@ const CaliforniaHousingInput = ({ onInputChange }) => {
             />
           </div>
         </div>
-        
+
         {/* California Map */}
-        <div className="relative rounded-xl border border-gray-700/50 bg-gradient-to-b from-gray-800/80 to-gray-900/80 overflow-hidden shadow-lg aspect-[2/3] max-h-[260px] w-full mx-auto flex flex-col">
-          <div className="flex-1 p-1.5 flex items-center justify-center">
+        <div className="relative rounded-xl border border-gray-700/50 bg-gradient-to-b from-gray-800/80 to-gray-900/80 overflow-hidden shadow-lg max-h-[260px] w-full flex flex-col">
+          <div className="flex-1 p-1.5 flex items-center justify-center min-h-0">
             <CaliforniaMap
               latitude={values.latitude}
               longitude={values.longitude}
@@ -661,12 +744,12 @@ const CaliforniaHousingInput = ({ onInputChange }) => {
               }}
             />
           </div>
-          <div className="pb-1 px-2 flex justify-center">
-            <span className="text-[9px] leading-tight text-gray-300 bg-gray-900/80 px-2 py-0.5 rounded whitespace-nowrap">
+          <div className="pb-1.5 px-2 flex flex-col items-center gap-0.5">
+            <span className="text-[10px] text-gray-300 font-mono bg-gray-900/80 px-2 py-0.5 rounded">
               {values.latitude.toFixed(1)}°N, {Math.abs(values.longitude).toFixed(1)}°W
             </span>
+            <span className="text-[8px] text-gray-500">Click or drag to move</span>
           </div>
-          <div className="text-center text-[8px] text-blue-300 pb-1">Click or drag on the map</div>
         </div>
       </div>
 
@@ -692,7 +775,7 @@ const CaliforniaHousingInput = ({ onInputChange }) => {
           const isMoney = feature.name === 'medInc';
           const isLocation = feature.name === 'latitude' || feature.name === 'longitude';
           const colorClass = isLocation ? 'accent-red-400' : (isMoney ? 'accent-emerald-400' : 'accent-amber-400');
-          
+
           return (
             <div key={feature.name} className="space-y-0.5 min-w-0">
               <div className="flex items-center justify-between gap-1">

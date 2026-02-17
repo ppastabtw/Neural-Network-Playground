@@ -88,48 +88,48 @@ const MODEL_TEMPLATES = [
 
 // Layer type styles with colors AND unique shapes/sizes for visual distinction
 const LAYER_STYLES = {
-  dense: { 
-    bg: 'bg-blue-600', bgDark: 'bg-blue-700', border: 'border-blue-400', 
+  dense: {
+    bg: 'bg-blue-600', bgDark: 'bg-blue-700', border: 'border-blue-400',
     shadow: 'shadow-blue-900/50',
     minWidth: 'min-w-[280px]',
     padding: 'px-4 py-3',
     rounded: 'rounded-xl',
     icon: '◆' // Diamond
   },
-  dropout: { 
-    bg: 'bg-amber-500', bgDark: 'bg-amber-600', border: 'border-amber-300', 
+  dropout: {
+    bg: 'bg-amber-500', bgDark: 'bg-amber-600', border: 'border-amber-300',
     shadow: 'shadow-amber-900/50',
     minWidth: 'min-w-[200px]',
     padding: 'px-4 py-2',
     rounded: 'rounded-2xl',
     icon: '○' // Circle (represents dropping)
   },
-  conv2d: { 
-    bg: 'bg-violet-600', bgDark: 'bg-violet-700', border: 'border-violet-400', 
+  conv2d: {
+    bg: 'bg-violet-600', bgDark: 'bg-violet-700', border: 'border-violet-400',
     shadow: 'shadow-violet-900/50',
     minWidth: 'min-w-[300px]',
     padding: 'px-4 py-4',
     rounded: 'rounded-2xl',
     icon: '▦' // Grid pattern
   },
-  maxpooling2d: { 
-    bg: 'bg-fuchsia-600', bgDark: 'bg-fuchsia-700', border: 'border-fuchsia-400', 
+  maxpooling2d: {
+    bg: 'bg-fuchsia-600', bgDark: 'bg-fuchsia-700', border: 'border-fuchsia-400',
     shadow: 'shadow-fuchsia-900/50',
     minWidth: 'min-w-[240px]',
     padding: 'px-4 py-3',
     rounded: 'rounded-xl',
     icon: '▼' // Downward (pooling reduces)
   },
-  avgpooling2d: { 
-    bg: 'bg-pink-500', bgDark: 'bg-pink-600', border: 'border-pink-300', 
+  avgpooling2d: {
+    bg: 'bg-pink-500', bgDark: 'bg-pink-600', border: 'border-pink-300',
     shadow: 'shadow-pink-900/50',
     minWidth: 'min-w-[240px]',
     padding: 'px-4 py-3',
     rounded: 'rounded-xl',
     icon: '▽'
   },
-  flatten: { 
-    bg: 'bg-orange-500', bgDark: 'bg-orange-600', border: 'border-orange-300', 
+  flatten: {
+    bg: 'bg-orange-500', bgDark: 'bg-orange-600', border: 'border-orange-300',
     shadow: 'shadow-orange-900/50',
     minWidth: 'min-w-[180px]',
     padding: 'px-4 py-2',
@@ -166,12 +166,12 @@ const ScratchBlock = ({ type, children, isInput, isOutput, color, onEdit, onDele
   } else if (isOutput) {
     styles = OUTPUT_STYLE;
   } else {
-    styles = color || LAYER_STYLES[type] || { 
-      bg: 'bg-gray-600', bgDark: 'bg-gray-700', border: 'border-gray-400', 
+    styles = color || LAYER_STYLES[type] || {
+      bg: 'bg-gray-600', bgDark: 'bg-gray-700', border: 'border-gray-400',
       shadow: 'shadow-gray-900/50', minWidth: 'min-w-[260px]', padding: 'px-4 py-3', rounded: 'rounded-lg'
     };
   }
-  
+
   const blockMinWidth = styles.minWidth || 'min-w-[260px]';
   const blockPadding = styles.padding || 'px-4 py-3';
   const blockRounded = styles.rounded || 'rounded-lg';
