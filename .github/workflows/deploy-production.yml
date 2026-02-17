@@ -32,9 +32,11 @@ jobs:
           script: |
             cd /var/www/nn-playground
             sudo git config --global --add safe.directory /var/www/nn-playground
+            sudo git reset --hard
+            sudo git clean -fd
             sudo git fetch origin main
             sudo git checkout main
-            sudo git pull origin main
+            sudo git reset --hard origin/main
             sudo bash deploy/deploy.sh
 
       - name: Health check
