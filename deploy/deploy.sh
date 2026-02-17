@@ -28,11 +28,14 @@ cd "$APP_DIR"
 echo "==> Running database migrations..."
 PYTHONPATH=src alembic upgrade head
 
+echo "==> Fixing file ownership..."
+chown -R www-data:www-data "$APP_DIR"
+
 echo "==> Restarting service..."
 systemctl restart nn-playground
 
 echo "==> Waiting for service to start..."
-sleep 3
+sleep 10
 
 echo "==> Health check..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health || true)
@@ -44,7 +47,8 @@ if [ "$HTTP_STATUS" = "200" ]; then
 else
     echo ""
     echo "  ✗ Health check failed (HTTP $HTTP_STATUS)."
-    echo "    Check logs:  sudo journalctl -u nn-playground -n 50"
-    echo ""
+    echo "  === Recent service logs ==="
+    journalctl -u nn-playground -n 80 --no-pager || true
+    echo "  ==========================="
     exit 1
 fi

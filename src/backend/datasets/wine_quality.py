@@ -17,7 +17,7 @@ class WineQualityDataset(BaseDataset):
     task_type = "classification"
     num_features = 11
     num_samples = 1600  # Approx per charter
-    num_classes = 10  # quality ratings typically 3-8, use 10 for safety
+    num_classes = 6  # quality ratings 3-8 → zero-indexed to 0-5
     description = "Multi-class quality prediction on red wine (11 numeric features)."
     hyperparameters = Hyperparameters(epochs=30, learning_rate=0.001, batch_size=128)
 
@@ -29,8 +29,9 @@ class WineQualityDataset(BaseDataset):
         X = data.data.to_numpy(dtype=np.float32)
         y = data.target.to_numpy()
 
-        # Classes are integer-like strings; cast to int64
+        # Classes are integer-like strings (3-8); cast and zero-index for CrossEntropyLoss
         y = y.astype(np.int64)
+        y = y - y.min()  # [3,4,5,6,7,8] → [0,1,2,3,4,5]
 
         if self.max_samples is not None and self.max_samples < len(X):
             X = X[: self.max_samples]

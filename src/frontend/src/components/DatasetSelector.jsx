@@ -67,7 +67,7 @@ const DatasetSelector = () => {
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Header */}
-      <div className="px-2 py-1.5 border-b border-gray-700 bg-gradient-to-r from-gray-750 to-gray-800 flex-shrink-0">
+      <div className="px-4 py-3 border-b border-gray-700 bg-gradient-to-r from-gray-750 to-gray-800 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <div className="w-5 h-5 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0">
@@ -76,12 +76,12 @@ const DatasetSelector = () => {
               </svg>
             </div>
             <div className="min-w-0">
-              <h2 className="text-xs font-semibold text-white truncate">Step 1: Dataset</h2>
-              <p className="text-[9px] text-gray-400 truncate">Choose your training data</p>
+              <h2 className="text-sm font-semibold text-white truncate">Step 1: Dataset</h2>
+              <p className="text-[10px] text-gray-400 truncate">Choose your training data</p>
             </div>
           </div>
           <Tooltip text="Pick a dataset first. It sets the input shape and number of outputs your network must learn." position="left">
-            <span className="w-4 h-4 rounded-full border border-blue-500/50 text-blue-200 flex items-center justify-center text-[9px] bg-blue-900/30 hover:bg-blue-800/50 transition-colors cursor-help flex-shrink-0">
+            <span className="w-5 h-5 rounded-full border border-blue-500/50 text-blue-200 flex items-center justify-center text-[10px] bg-blue-900/30 hover:bg-blue-800/50 transition-colors cursor-help flex-shrink-0">
               ?
             </span>
           </Tooltip>

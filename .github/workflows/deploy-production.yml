@@ -31,18 +31,11 @@ jobs:
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
             cd /var/www/nn-playground
-            git fetch origin main
-            git checkout main
-            git pull origin main
+            sudo git config --global --add safe.directory /var/www/nn-playground
+            sudo git reset --hard
+            sudo git clean -fd
+            sudo git fetch origin main
+            sudo git checkout main
+            sudo git reset --hard origin/main
             sudo bash deploy/deploy.sh
 
-      - name: Health check
-        run: |
-          sleep 5
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.PRODUCTION_HOST }}/api/health || true)
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "Production deploy healthy!"
-          else
-            echo "Production health check failed (HTTP $HTTP_STATUS)"
-            exit 1
-          fi

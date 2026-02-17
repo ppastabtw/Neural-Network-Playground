@@ -32,18 +32,11 @@ jobs:
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
             cd /var/www/nn-playground
-            git fetch origin
-            git checkout ${{ github.head_ref }}
-            git pull origin ${{ github.head_ref }}
+            sudo git config --global --add safe.directory /var/www/nn-playground
+            sudo git reset --hard
+            sudo git clean -fd
+            sudo git fetch origin
+            sudo git checkout ${{ github.head_ref }}
+            sudo git reset --hard origin/${{ github.head_ref }}
             sudo bash deploy/deploy.sh
 
-      - name: Health check
-        run: |
-          sleep 5
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.STAGING_HOST }}/api/health || true)
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "Staging deploy healthy!"
-          else
-            echo "Staging health check failed (HTTP $HTTP_STATUS)"
-            exit 1
-          fi

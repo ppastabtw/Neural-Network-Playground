@@ -17,54 +17,104 @@ const WINE_FEATURES = [
 const buildDefaults = () =>
   WINE_FEATURES.reduce((acc, f) => ({ ...acc, [f.name]: f.default }), {});
 
-// Wine glass visualization that responds to the slider values
-function WineVisualization({ alcohol, pH, residualSugar, volatileAcidity }) {
-  const normalize = (value, min, max, targetMin, targetMax) => {
-    return targetMin + ((value - min) / (max - min)) * (targetMax - targetMin);
+// Wine glass visualization — every slider drives a visible change
+function WineVisualization({ alcohol, pH, residualSugar, volatileAcidity, fixedAcidity, sulphates, chlorides, freeSulfur, totalSulfur, citricAcid, density }) {
+  const norm = (value, min, max, lo, hi) => {
+    const t = Math.max(0, Math.min(1, (value - min) / (max - min)));
+    return lo + t * (hi - lo);
   };
 
-  // Wine color based on pH and acidity (lower pH = more vibrant red)
-  const colorIntensity = normalize(pH, 2.8, 4, 1, 0.5);
-  const redValue = Math.round(140 + colorIntensity * 60);
-  const wineColor = `rgb(${redValue}, 20, 40)`;
-  const wineColorLight = `rgb(${redValue + 40}, 40, 60)`;
-  
-  // Fill level based on alcohol content
-  const fillLevel = normalize(alcohol, 8, 15, 30, 75);
-  
-  // Bubble count based on volatile acidity (more = more bubbles/fizz)
-  const bubbleCount = Math.round(normalize(volatileAcidity, 0, 1.6, 0, 8));
-  
-  // Sweetness indicator - sugar affects "legs" on glass
-  const legCount = Math.round(normalize(residualSugar, 0, 16, 2, 8));
-  
-  // Body/viscosity based on density approximation (sugar + alcohol)
-  const viscosity = normalize(residualSugar + alcohol * 0.5, 8, 24, 0.3, 1);
+  // ── COLOR  (pH + fixedAcidity) ────────────────────────────
+  // Low pH / high acid → deep garnet;  high pH / low acid → pale rosé
+  const pHFactor    = norm(pH, 2.8, 4, 1, 0);          // 1 = deep, 0 = pale
+  const acidFactor  = norm(fixedAcidity, 4, 16, 0, 1);  // high acid = deep
+  const depth       = pHFactor * 0.6 + acidFactor * 0.4;
+  const r = Math.round(90 + depth * 130);    // 90 – 220
+  const g = Math.round(5 + (1 - depth) * 45); // 50 – 5
+  const b = Math.round(20 + (1 - depth) * 35); // 55 – 20
+  const wineColor     = `rgb(${r},${g},${b})`;
+  const wineColorLt   = `rgb(${Math.min(255, r + 55)},${g + 25},${b + 25})`;
+  const wineColorDk   = `rgb(${Math.round(r * 0.35)},${Math.round(g * 0.3)},${Math.round(b * 0.35)})`;
+
+  // ── FILL LEVEL  (alcohol) ─────────────────────────────────
+  const fillLevel = norm(alcohol, 8, 15, 18, 82);
+
+  // ── BUBBLES  (volatileAcidity + freeSulfur) ───────────────
+  const bubbleCount = Math.round(
+    norm(volatileAcidity, 0, 1.6, 0, 6) + norm(freeSulfur, 0, 70, 0, 5)
+  );
+
+  // ── LEGS / TEARS  (residualSugar + density) ───────────────
+  const legCount = Math.round(norm(residualSugar, 0, 16, 1, 9));
+  const viscosity = norm(density, 0.99, 1.01, 0.15, 1);
+
+  // ── AROMA SWIRLS  (alcohol + citricAcid + sulphates) ──────
+  const aromaOpacity = Math.min(0.7,
+    norm(alcohol, 8, 15, 0.05, 0.35) +
+    norm(citricAcid, 0, 1, 0, 0.15) +
+    norm(sulphates, 0.3, 2, 0, 0.15)
+  );
+
+  // ── HAZE / CLOUDINESS  (chlorides + totalSulfur) ──────────
+  const haze = norm(chlorides, 0, 0.6, 0, 0.22) + norm(totalSulfur, 0, 300, 0, 0.13);
+
+  // ── SWEETNESS GLOW  (residualSugar) ───────────────────────
+  const sweetnessGlow = norm(residualSugar, 0, 16, 0, 0.25);
+
+  const wineTop = 95 - fillLevel;
 
   return (
     <svg viewBox="0 0 120 160" className="w-full h-full">
       <defs>
+        <radialGradient id="wBg" cx="50%" cy="40%" r="65%">
+          <stop offset="0%" stopColor="#2a1f1a" />
+          <stop offset="100%" stopColor="#1a1215" />
+        </radialGradient>
+        <radialGradient id="candleGlow" cx="12%" cy="88%" r="35%">
+          <stop offset="0%" stopColor="#ff9940" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#ff9940" stopOpacity="0" />
+        </radialGradient>
         <linearGradient id="wineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={wineColorLight} />
-          <stop offset="50%" stopColor={wineColor} />
-          <stop offset="100%" stopColor="rgb(80, 10, 25)" />
+          <stop offset="0%" stopColor={wineColorLt} />
+          <stop offset="40%" stopColor={wineColor} />
+          <stop offset="100%" stopColor={wineColorDk} />
         </linearGradient>
-        <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.1)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.05)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.15)" />
+        <linearGradient id="wineSurface" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={wineColor} stopOpacity="0.7" />
+          <stop offset="35%" stopColor={wineColorLt} stopOpacity="0.9" />
+          <stop offset="65%" stopColor={wineColorLt} stopOpacity="0.7" />
+          <stop offset="100%" stopColor={wineColor} stopOpacity="0.7" />
+        </linearGradient>
+        {/* Sweetness warmth around wine */}
+        <radialGradient id="sweetnessGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FFB347" stopOpacity={sweetnessGlow} />
+          <stop offset="100%" stopColor="#FFB347" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="glassShine" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.14)" />
+          <stop offset="25%" stopColor="rgba(255,255,255,0.03)" />
+          <stop offset="75%" stopColor="rgba(255,255,255,0.03)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.18)" />
         </linearGradient>
         <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.1)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.2)" />
+          <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0.08)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.22)" />
+        </linearGradient>
+        <linearGradient id="aromaGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+          <stop offset="0%" stopColor={wineColorLt} stopOpacity="0.6" />
+          <stop offset="100%" stopColor={wineColorLt} stopOpacity="0" />
         </linearGradient>
         <filter id="wineGlow">
           <feGaussianBlur stdDeviation="2" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="softBlur">
+          <feGaussianBlur stdDeviation="3" />
+        </filter>
+        <filter id="bubbleGlow">
+          <feGaussianBlur stdDeviation="0.8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
         <clipPath id="glassClip">
           <path d="M 30 25 Q 25 50 28 75 Q 30 90 45 95 L 45 95 Q 55 97 60 97 Q 65 97 75 95 L 75 95 Q 90 90 92 75 Q 95 50 90 25 Z" />
@@ -72,88 +122,115 @@ function WineVisualization({ alcohol, pH, residualSugar, volatileAcidity }) {
       </defs>
 
       {/* Background */}
-      <rect x="0" y="0" width="120" height="160" fill="#1f2937" rx="8" />
-      
-      {/* Wine glass bowl outline */}
-      <path 
+      <rect x="0" y="0" width="120" height="160" fill="url(#wBg)" rx="8" />
+      <rect x="0" y="0" width="120" height="160" fill="url(#candleGlow)" rx="8" />
+
+      {/* Table surface */}
+      <line x1="8" y1="142" x2="112" y2="142" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+
+      {/* Glass shadow */}
+      <ellipse cx="60" cy="140" rx="24" ry="4" fill="rgba(0,0,0,0.35)" filter="url(#softBlur)" />
+
+      {/* ── Aroma swirls ── */}
+      <g opacity={aromaOpacity}>
+        <path d="M 48 22 Q 41 12 48 3 Q 55 -6 48 -14" fill="none" stroke="url(#aromaGrad)" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+        <path d="M 60 20 Q 67 9 58 0 Q 50 -9 58 -16" fill="none" stroke="url(#aromaGrad)" strokeWidth="1.5" strokeLinecap="round" opacity="0.55" />
+        <path d="M 72 22 Q 79 12 72 3 Q 65 -6 72 -14" fill="none" stroke="url(#aromaGrad)" strokeWidth="2" strokeLinecap="round" opacity="0.4" />
+        {aromaOpacity > 0.35 && (
+          <path d="M 55 21 Q 48 8 55 -3 Q 62 -14 55 -20" fill="none" stroke="url(#aromaGrad)" strokeWidth="1" strokeLinecap="round" opacity="0.3" />
+        )}
+      </g>
+
+      {/* Glass bowl */}
+      <path
         d="M 30 25 Q 25 50 28 75 Q 30 90 45 95 L 45 95 Q 55 97 60 97 Q 65 97 75 95 L 75 95 Q 90 90 92 75 Q 95 50 90 25 Z"
-        fill="url(#glassGrad)"
-        stroke="rgba(255,255,255,0.3)"
-        strokeWidth="1"
+        fill="url(#glassShine)"
+        stroke="rgba(255,255,255,0.25)"
+        strokeWidth="0.8"
       />
-      
-      {/* Wine fill */}
+
+      {/* ── Wine fill ── */}
       <g clipPath="url(#glassClip)">
-        <rect 
-          x="28" 
-          y={95 - fillLevel} 
-          width="64" 
-          height={fillLevel + 5}
-          fill="url(#wineGrad)"
-          filter="url(#wineGlow)"
-        />
-        
-        {/* Wine surface highlight */}
-        <ellipse 
-          cx="60" 
-          cy={95 - fillLevel + 2} 
-          rx="30" 
-          ry="4"
-          fill={wineColorLight}
-          opacity="0.6"
-        />
-        
-        {/* Bubbles based on volatile acidity */}
-        {Array.from({ length: bubbleCount }).map((_, i) => (
-          <circle
-            key={i}
-            cx={35 + (i * 7) + Math.sin(i) * 5}
-            cy={95 - fillLevel + 10 + (i % 3) * 8}
-            r={1 + (i % 2)}
-            fill="rgba(255,255,255,0.3)"
-          />
-        ))}
-        
-        {/* Wine legs inside glass (above wine level) */}
+        {/* Main wine body */}
+        <rect x="28" y={wineTop} width="64" height={fillLevel + 5} fill="url(#wineGrad)" filter="url(#wineGlow)" />
+
+        {/* Sweetness warmth glow */}
+        {sweetnessGlow > 0.05 && (
+          <rect x="28" y={wineTop} width="64" height={fillLevel + 5} fill="url(#sweetnessGlow)" />
+        )}
+
+        {/* Haze / cloudiness overlay (chlorides + totalSulfur) */}
+        {haze > 0.05 && (
+          <rect x="28" y={wineTop} width="64" height={fillLevel + 5} fill="rgba(180,160,130,1)" opacity={haze} />
+        )}
+
+        {/* Wine surface meniscus */}
+        <ellipse cx="60" cy={wineTop + 2} rx="30" ry="5" fill="url(#wineSurface)" />
+
+        {/* Specular highlight */}
+        <ellipse cx="47" cy={wineTop + 1} rx="9" ry="2" fill="rgba(255,255,255,0.12)" />
+
+        {/* ── Bubbles (volatileAcidity + freeSulfur) ── */}
+        <g filter="url(#bubbleGlow)">
+          {Array.from({ length: bubbleCount }).map((_, i) => {
+            const col = i % 4;
+            const row = Math.floor(i / 4);
+            const bx = 37 + col * 11 + Math.sin(i * 1.7) * 3;
+            const by = wineTop + 14 + row * 10 + (i % 3) * 4;
+            const br = 1.2 + (i % 3) * 0.8;
+            return (
+              <g key={i}>
+                <circle cx={bx} cy={by} r={br} fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.35)" strokeWidth="0.5" />
+                <circle cx={bx - br * 0.3} cy={by - br * 0.3} r={br * 0.25} fill="rgba(255,255,255,0.4)" />
+              </g>
+            );
+          })}
+        </g>
+
+        {/* ── Wine legs / tears (residualSugar + density) ── */}
         {Array.from({ length: legCount }).map((_, i) => {
-          const legX = 35 + i * (50 / (legCount + 1));
-          const wineTop = 95 - fillLevel;
+          const legX = 34 + i * (52 / (legCount + 1));
+          const legLen = 8 + viscosity * 12;
+          const tearR = 1.2 + viscosity * 1;
           return (
-            <line
-              key={`leg-${i}`}
-              x1={legX}
-              y1={wineTop - 2}
-              x2={legX + (i % 2 ? 1 : -1)}
-              y2={wineTop - 8 - (viscosity * 8)}
-              stroke={wineColor}
-              strokeWidth="1.5"
-              opacity={0.5}
-              strokeLinecap="round"
-            />
+            <g key={`leg-${i}`}>
+              <line
+                x1={legX} y1={wineTop - 1}
+                x2={legX + (i % 2 ? 1 : -1)} y2={wineTop - legLen}
+                stroke={wineColor} strokeWidth={1.5 + viscosity * 0.8}
+                opacity={0.55} strokeLinecap="round"
+              />
+              <circle
+                cx={legX + (i % 2 ? 1 : -1)} cy={wineTop - legLen}
+                r={tearR} fill={wineColor} opacity={0.5}
+              />
+            </g>
           );
         })}
       </g>
-      
-      {/* Glass rim highlight */}
-      <ellipse cx="60" cy="25" rx="30" ry="5" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-      
-      {/* Glass stem */}
+
+      {/* Glass reflections */}
+      <path d="M 32 30 Q 27 52 30 75" fill="none" stroke="rgba(255,255,255,0.13)" strokeWidth="1" strokeLinecap="round" />
+      <path d="M 88 30 Q 93 52 90 75" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.8" strokeLinecap="round" />
+
+      {/* Glass rim */}
+      <ellipse cx="60" cy="25" rx="30" ry="5" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="0.8" />
+      <path d="M 36 24 Q 48 20 60 20 Q 72 20 84 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+
+      {/* Stem */}
       <rect x="57" y="97" width="6" height="35" fill="url(#stemGrad)" rx="1" />
-      
-      {/* Glass base */}
-      <ellipse cx="60" cy="135" rx="20" ry="5" fill="url(#stemGrad)" />
-      <ellipse cx="60" cy="137" rx="22" ry="4" fill="rgba(255,255,255,0.1)" />
-      
-      {/* Quality indicators */}
-      <g className="text-[8px]">
-        {/* Alcohol indicator */}
-        <text x="8" y="150" fill="#9ca3af" fontSize="7">ABV</text>
-        <text x="8" y="158" fill="#fbbf24" fontSize="8" fontWeight="bold">{alcohol.toFixed(1)}%</text>
-        
-        {/* pH indicator */}
-        <text x="95" y="150" fill="#9ca3af" fontSize="7">pH</text>
-        <text x="95" y="158" fill="#f87171" fontSize="8" fontWeight="bold">{pH.toFixed(1)}</text>
-      </g>
+      <line x1="58.5" y1="99" x2="58.5" y2="130" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+
+      {/* Base */}
+      <ellipse cx="60" cy="134" rx="20" ry="5" fill="url(#stemGrad)" />
+      <ellipse cx="60" cy="135.5" rx="22" ry="3.5" fill="rgba(255,255,255,0.07)" />
+      <path d="M 43 133 Q 52 131 60 131 Q 68 131 77 133" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+
+      {/* Indicators */}
+      <text x="8" y="152" fill="#7c7168" fontSize="6">ABV</text>
+      <text x="8" y="158" fill="#fbbf24" fontSize="7" fontWeight="600">{alcohol.toFixed(1)}%</text>
+      <text x="95" y="152" fill="#7c7168" fontSize="6">pH</text>
+      <text x="95" y="158" fill="#f87171" fontSize="7" fontWeight="600">{pH.toFixed(1)}</text>
     </svg>
   );
 }
@@ -235,6 +312,11 @@ const WineQualityInput = ({ onInputChange }) => {
             volatileAcidity={values.volatileAcidity}
             fixedAcidity={values.fixedAcidity}
             sulphates={values.sulphates}
+            chlorides={values.chlorides}
+            freeSulfur={values.freeSulfur}
+            totalSulfur={values.totalSulfur}
+            citricAcid={values.citricAcid}
+            density={values.density}
           />
         </div>
         <div className="flex-1 p-3 bg-gradient-to-r from-gray-800 via-gray-800/70 to-gray-750 border border-gray-700 rounded-lg text-[11px] text-gray-300 leading-snug shadow-inner">
