@@ -47,7 +47,8 @@ if [ "$HTTP_STATUS" = "200" ]; then
 else
     echo ""
     echo "  ✗ Health check failed (HTTP $HTTP_STATUS)."
-    echo "    Check logs:  sudo journalctl -u nn-playground -n 50"
-    echo ""
+    echo "  === Recent service logs ==="
+    journalctl -u nn-playground -n 80 --no-pager || true
+    echo "  ==========================="
     exit 1
 fi
