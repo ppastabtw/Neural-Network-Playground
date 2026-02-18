@@ -1,185 +1,134 @@
 # Neural Network Playground
 
-**Project Type:** Educational ML Tool
-**Status:** Completed
-**Timeline:** Nov 2025
-**Team Size:** 5 developers
+An interactive web application for learning neural networks by visually designing, training, and testing Multi-Layer Perceptrons — no code required.
 
----
+**Live at [nurel.app](https://nurel.app)**
 
-## Project Vision
-
-An accessible, interactive web application that enables beginners to learn neural networks by visually designing, training, and testing Multi-Layer Perceptrons **without writing code**.
-
-### Target User
-**"Alex the ML Beginner"** - Computer science student with basic Python knowledge, curious about neural networks but intimidated by the steep learning curve of PyTorch/TensorFlow.
-
-### Success Criteria
-A user with basic ML knowledge can complete the full workflow (select dataset → build model → train → test) in <15 minutes and understand how model complexity affects performance.
-
----
-
-## Quick Start
-
-> **Windows Users:** For a comprehensive Windows-specific guide including troubleshooting and PowerShell tips, see **[docs/WINDOWS_SETUP.md](docs/WINDOWS_SETUP.md)**
-
-### Prerequisites
-- Python 3.12+
-- Node.js 18+
-
-### Setup Instructions
-
-#### 1. Backend Setup
-
-**Linux/macOS:**
-```bash
-# Navigate to project directory
-cd Project
-
-# Create and activate virtual environment (optional but recommended)
-python -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend server (PYTHONPATH must include src directory)
-PYTHONPATH=src uvicorn src.backend.api.main:app --reload --port 8000
-```
-
-**Windows (PowerShell):**
-```powershell
-# Navigate to project directory
-cd Project
-
-# Activate virtual environment
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend server
-$env:PYTHONPATH='src'; python -m uvicorn src.backend.api.main:app --reload --port 8000
-```
-
-#### 2. Frontend Setup
-```bash
-# Navigate to frontend directory
-cd src/frontend
-
-# Install dependencies
-npm install
-
-# Run dev server
-npm run dev
-```
-*Note for Windows users: If `npm` is not recognized, ensure Node.js is in your PATH.*
-
-#### Access Points
-- **Frontend App:** http://localhost:5173
-- **Backend API:** http://localhost:8000
-- **API Docs:** http://localhost:8000/docs
+**Team:** 5 developers | **Course:** SE101, University of Waterloo | **Term:** Fall 2025
 
 ---
 
 ## Features
 
-### Core Functionality
-- **Visual Model Builder**: Drag-and-drop interface to design Neural Networks (MLPs) using React Flow.
-- **Interactive Training**: Watch your model learn in real-time with live Loss and Accuracy graphs.
-- **Dataset Library**: 5 curated datasets for Classification and Regression tasks:
-  - **MNIST** (Digit Recognition)
-  - **Iris** (Flower Classification)
-  - **California Housing** (Price Prediction)
-  - **Wine Quality** (Quality Classification)
-  - **Synthetic** (Spiral/XOR patterns)
-- **Template System**: Pre-built architectures to get started quickly.
+- **Visual Model Builder** — Design neural network architectures with a drag-and-drop interface (React Flow)
+- **Real-time Training** — Watch your model learn with live loss and accuracy charts
+- **5 Datasets** — MNIST, Iris, California Housing, Wine Quality, and Synthetic (spiral/XOR)
+- **Template System** — Pre-built architectures to get started quickly
+- **Testing Panel** — Run predictions on trained models with interactive, dataset-specific input forms
 
-### Technical Features
-- **Dynamic PyTorch Engine**: Backend automatically constructs PyTorch models from JSON architecture specs.
-- **Real-time Metrics**: WebSocket/Polling integration for live training updates.
-- **Layer Support**: Linear, ReLU, Sigmoid, Tanh, Conv2d, MaxPool2d, Flatten, Dropout.
-- **Configurable Hyperparameters**: Learning rate, batch size, and epochs (pre-configured for ease of use).
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React, Vite, React Flow, Recharts, Tailwind CSS |
+| **Backend** | FastAPI, PyTorch, scikit-learn, NumPy, Pandas |
+| **Database** | PostgreSQL (RDS) / SQLite (dev), SQLAlchemy, Alembic |
+| **Infra** | AWS EC2, Nginx, Uvicorn, GitHub Actions CI/CD |
 
 ---
 
 ## Architecture
 
-### Tech Stack
-
-#### Backend
-- **Framework:** FastAPI
-- **ML Library:** PyTorch
-- **Data Processing:** NumPy, Pandas, scikit-learn
-- **Testing:** pytest
-- **Server:** Uvicorn
-
-#### Frontend
-- **Framework:** React + Vite
-- **Drag-and-Drop:** React Flow
-- **Visualization:** Recharts
-- **Styling:** Tailwind CSS
-- **State:** React Context API
-
-### System Architecture
 ```
-┌─────────────────────────────────────────┐
-│           FRONTEND (React)              │
-│  Dataset Selector → Visual Builder →   │
-│  Training Dashboard → Testing UI        │
-└──────────────┬──────────────────────────┘
-               │ REST API
-┌──────────────┴──────────────────────────┐
-│           BACKEND (FastAPI)             │
-│  Dataset API → Model API → Training API │
-│  Dynamic model.py → PyTorch Engine      │
-└─────────────────────────────────────────┘
+                    ┌──────────────────────────┐
+                    │      GitHub Actions       │
+                    │  CI: lint, test, build     │
+                    └────┬───────────┬──────────┘
+                         │           │
+                  PR to main    Push to main
+                         │           │
+                  ┌──────▼──┐  ┌────▼──────┐
+                  │ Staging  │  │Production │
+                  │   EC2    │  │   EC2     │
+                  └────┬─────┘ └────┬──────┘
+                       │             │
+                  Nginx (80/443) + Uvicorn (8000)
+                       │             │
+                  ┌────▼─────────────▼──────┐
+                  │       Amazon RDS        │
+                  │      PostgreSQL         │
+                  └─────────────────────────┘
+```
+
+---
+
+## Quick Start (Local Development)
+
+> **Windows users:** See [docs/WINDOWS_SETUP.md](docs/WINDOWS_SETUP.md) for a detailed guide.
+
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+
+### Backend
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+PYTHONPATH=src uvicorn src.backend.api.main:app --reload --port 8000
+```
+
+### Frontend
+
+```bash
+cd src/frontend
+npm install
+npm run dev
+```
+
+### Access Points
+- **App:** http://localhost:5173
+- **API:** http://localhost:8000
+- **Docs:** http://localhost:8000/docs
+
+---
+
+## CI/CD
+
+Every push and PR runs the [CI pipeline](.github/workflows/ci.yml):
+- **Backend:** black, isort, flake8, pytest with coverage
+- **Frontend:** ESLint, Vitest, production build
+
+Deployments are automated via GitHub Actions:
+- **PR to main** — deploys to [staging.nurel.app](https://staging.nurel.app)
+- **Merge to main** — deploys to [nurel.app](https://nurel.app)
+
+See [deploy/AWS_SETUP.md](deploy/AWS_SETUP.md) for infrastructure details.
+
+---
+
+## Testing
+
+```bash
+# Backend
+pytest --cov=src/backend
+
+# Frontend
+cd src/frontend
+npm test
 ```
 
 ---
 
 ## Documentation
 
-- **[User Manual](docs/user_manual.md)** - Guide for end-users to operate the app.
-- **[Test Report](docs/test_report.md)** - Summary of test execution and coverage.
-- **[Dataset Overview](docs/datasets/README.md)** - Details on available datasets.
-- **[Windows Setup](docs/WINDOWS_SETUP.md)** - Specific setup guide for Windows.
+- [User Manual](docs/user_manual.md)
+- [Test Report](docs/test_report.md)
+- [Dataset Overview](docs/datasets/README.md)
+- [Windows Setup](docs/WINDOWS_SETUP.md)
+- [AWS Infrastructure](deploy/AWS_SETUP.md)
 
 ---
 
-## Development & Testing
+## Team
 
-### Running Tests
-```bash
-# Run all backend tests
-pytest
-
-# Run specific test file
-pytest tests/backend/test_api.py
-
-# Run frontend tests
-cd src/frontend
-npm run test
-```
-
-### Contributing
-- **Code Style:** PEP 8 (Python), Prettier (JS/React)
-- **Testing:** New features must include unit tests.
-
----
-
-## License & Credits
-
-**Project:** Neural Network Playground
-**Course:** SE101 - Introduction to Methods of Software Engineering
-**Institution:** University of Waterloo
-**Term:** Fall 2025
-**Team:** Team 8
-
-**Team Members:**
-- Yi Xing
-- Sicheng Ouyang
-- David Estrine
-- Kevin Yan
-- Ario Ostovary
+| Name |
+|------|
+| Yi Xing |
+| Sicheng Ouyang |
+| David Estrine |
+| Kevin Yan |
+| Ario Ostovary |
